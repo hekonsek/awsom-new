@@ -5,15 +5,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var RootCmd = &cobra.Command{
-	Use:   "awsom",
-	Short: "Awsom - easy AWS applications",
+func init() {
+	RootCmd.AddCommand(envCommand)
+}
 
+var envCommand = &cobra.Command{
+	Use:   "env",
+	Short: "Commands related to environments.",
 	Run: func(cmd *cobra.Command, args []string) {
 		osexit.ExitOnError(cmd.Help())
 	},
-}
-
-func main() {
-	osexit.ExitOnError(RootCmd.Execute())
 }

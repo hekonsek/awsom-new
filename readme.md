@@ -1,1 +1,1 @@
-# Awsom - toolkit for AWS patterns and best practices
+# Awsom - easy AWS applications
