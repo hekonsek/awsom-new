@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Structures
+// Create
 
 type vpcBuilder struct {
 	Name      string
@@ -41,8 +41,6 @@ func (vpc *vpcBuilder) WithCidrBlockPrefix(cidrBlockPrefix string) *vpcBuilder {
 	vpc.Subnets[2].Cidr = cidrBlockPrefix + ".128.0/18"
 	return vpc
 }
-
-// vpcBuilder operations
 
 func (vpc *vpcBuilder) Create() error {
 	vpcExists, err := VpcExistsByName(vpc.Name)
@@ -169,6 +167,8 @@ func (vpc *vpcBuilder) Create() error {
 	return nil
 }
 
+// Read
+
 func ListVpc() ([]string, error) {
 	ec2Service, err := NewEc2Service()
 	if err != nil {
@@ -243,6 +243,35 @@ func VpcId(name string) (string, error) {
 	}
 }
 
+func VpcSubnetsByName(vpcName string) ([]string, error) {
+	ec2Service, err := NewEc2Service()
+	if err != nil {
+		return nil, err
+	}
+
+	vpcId, err := VpcId(vpcName)
+	if err != nil {
+		return nil, err
+	}
+
+	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
+		Filters: []*ec2.Filter{
+			{
+				Name:   aws.String("vpc-id"),
+				Values: []*string{aws.String(vpcId)},
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	subnetsIds := []string{}
+	for _, subnet := range subnets.Subnets {
+		subnetsIds = append(subnetsIds, *subnet.SubnetId)
+	}
+	return subnetsIds, nil
+}
+
 func SubnetId(name string) (string, error) {
 	ec2Service, err := NewEc2Service()
 	if err != nil {
@@ -267,6 +296,8 @@ func SubnetId(name string) (string, error) {
 		return "", nil
 	}
 }
+
+// Delete
 
 func DeleteVpc(name string) error {
 	ec2Service, err := NewEc2Service()
@@ -365,35 +396,6 @@ func DeleteVpc(name string) error {
 	}
 
 	return nil
-}
-
-func VpcSubnetsByName(vpcName string) ([]string, error) {
-	ec2Service, err := NewEc2Service()
-	if err != nil {
-		return nil, err
-	}
-
-	vpcId, err := VpcId(vpcName)
-	if err != nil {
-		return nil, err
-	}
-
-	subnets, err := ec2Service.DescribeSubnets(&ec2.DescribeSubnetsInput{
-		Filters: []*ec2.Filter{
-			{
-				Name:   aws.String("vpc-id"),
-				Values: []*string{aws.String(vpcId)},
-			},
-		},
-	})
-	if err != nil {
-		return nil, err
-	}
-	subnetsIds := []string{}
-	for _, subnet := range subnets.Subnets {
-		subnetsIds = append(subnetsIds, *subnet.SubnetId)
-	}
-	return subnetsIds, nil
 }
 
 // Services
