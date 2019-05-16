@@ -1,0 +1,1 @@
+# Awsom - toolkit for AWS patterns and best practices
